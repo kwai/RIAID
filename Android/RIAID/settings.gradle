@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "RIAID"
+include ':app'
+include ':lib:riaid'
+include ':lib:riaid-adapter'
+include ':production:common'
+include ':production:reward'
+include ':lib:riaid-libs'
+include ':production:demo'

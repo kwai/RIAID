@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.kwaishou.riaid.production.common'
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 19
+        targetSdk 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    configurations {
+        all*.exclude group: 'com.kuaishou.riaid.proto.nano'
+    }
+
+    packagingOptions {
+        exclude 'com.kuaishou.riaid.proto.nano'// 这里是具体的冲突文件全路径
+    }
+}
+dependencies {
+    implementation fileTree(dir: 'libs', includes: ['*.jar', '*.aar'])
+    api('com.google.protobuf:protobuf-java:3.21.5')
+    api 'com.google.protobuf:protobuf-java-util:3.21.5'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    api project(":lib:riaid-libs")
+}
