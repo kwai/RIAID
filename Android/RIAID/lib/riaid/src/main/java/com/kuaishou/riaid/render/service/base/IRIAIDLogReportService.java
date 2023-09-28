@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 
 /**
  * 用于上报RIAID的一些数据指标，例：UI渲染时长
- * https://docs.corp.kuaishou.com/d/home/fcABAVQfeA8ge5jBA6uGQLOK7#section=vodka.oecpmkoge84l
  */
 public interface IRIAIDLogReportService {
   /**

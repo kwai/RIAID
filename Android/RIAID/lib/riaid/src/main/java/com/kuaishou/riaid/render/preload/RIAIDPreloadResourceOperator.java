@@ -33,7 +33,6 @@ import com.kuaishou.riaid.render.service.RiaidExecutorService;
  * 负责RIAID的资源的预加载管理。相关的操作在子线程中执行，包括：
  * - 遍历Node找到对应的资源
  * - 下载资源存到本地中
- * - 下载库文档：https://docs.corp.kuaishou.com/d/home/fcAD4mEkLt1sH4Nt4jsClkMRn
  * 非单例
  */
 public class RIAIDPreloadResourceOperator {
