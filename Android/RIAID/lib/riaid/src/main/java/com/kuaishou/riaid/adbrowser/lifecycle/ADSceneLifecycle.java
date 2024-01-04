@@ -2,6 +2,7 @@ package com.kuaishou.riaid.adbrowser.lifecycle;
 
 /**
  * 定义的{@link com.kuaishou.riaid.adbrowser.scene.ADScene}的生命周期。
+ * @author sunhongfa
  */
 public interface ADSceneLifecycle {
 

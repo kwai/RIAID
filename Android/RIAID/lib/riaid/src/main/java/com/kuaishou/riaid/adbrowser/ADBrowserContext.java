@@ -30,6 +30,7 @@ import com.kuaishou.riaid.render.service.base.render.IRenderService;
 /**
  * 在{@link ADBrowser}初始化时创建，持有了{@link Context}、{@link ADBridge}等，
  * 存放了ADBrowser生命周期内创建的对象可能需要的数据，并对外提供get方法。
+ * @author sunhongfa
  */
 public class ADBrowserContext {
   /**

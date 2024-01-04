@@ -15,6 +15,7 @@ import com.kuaishou.riaid.render.interf.IRealViewWrapper;
 /**
  * 广告场景接口，一个卡片或者一个样式称为一个场景。
  * 可以支持自定义场景。
+ * @author sunhongfa
  */
 public interface ADScene extends ADSceneLifecycle {
   /**

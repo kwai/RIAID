@@ -5,6 +5,7 @@ import com.kuaishou.riaid.adbrowser.trigger.ADTrigger;
 /**
  * 场景Transition的执行器的抽象，一般在{@link ADTrigger}中创建并执行。
  * 对外暴露执行和释放接口
+ * @author sunhongfa
  */
 public interface ADTransitionExecutor {
 

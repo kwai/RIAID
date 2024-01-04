@@ -41,6 +41,8 @@ import com.kuaishou.riaid.render.util.ToolHelper;
  * {@link ADDirector}是内部使用，通过{@link ADBrowser}调用其相应的函数来触发场景的转场等。
  * 内部会持有一个{@link ADBridgeHandler}，用来处理相关的行为。另外{@link ADBrowser}实现了
  * {@link ADBrowserLifecycle}，与{@link ADBrowser}的生命周期一致。
+ *
+ * @author sunhongfa
  */
 public class ADDirector implements ADBrowserLifecycle {
   private static final String TAG = "ADDirector";
@@ -371,7 +373,8 @@ public class ADDirector implements ADBrowserLifecycle {
         ADBrowserLogger.e("ADDirector 场景创建失败 sceneKey:" + sceneModel.key);
       }
     }
-    ADBrowserLogger.i("ADDirector buildScene 耗时：" + (System.currentTimeMillis() - startBuildTime));
+    ADBrowserLogger.i(
+        "ADDirector buildScene 耗时：" + (System.currentTimeMillis() - startBuildTime));
   }
 
   /**

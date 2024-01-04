@@ -9,6 +9,7 @@ import com.kuaishou.riaid.render.service.base.IMediaPlayerService;
 
 /**
  * Browser服务的接口约束，要求提供两个非空的Service，是ADRender需要的。
+ * @author sunhongfa
  */
 public interface ADBrowserService {
 

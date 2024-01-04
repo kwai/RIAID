@@ -13,6 +13,7 @@ import com.kuaishou.riaid.adbrowser.ADBrowser;
 /**
  * 输入通知到{@link ADBrowser}的一些事件，如：视频开始、视频结束
  * 这些事件会触发一些内置的key对应的{@link com.kuaishou.riaid.adbrowser.trigger.ADTrigger}
+ * @author sunhongfa
  */
 public interface ADBrowserToggleEvent {
 

@@ -31,6 +31,8 @@ import com.kuaishou.riaid.render.interf.IRealViewWrapper;
  * 有一些{@link ADBrowser}不能处理的，比如上报埋点，控制视频的播放，
  * 需要通过{@link #addBrowserMetricsEventListener(ADBrowserMetricsEventListener)} 来添加监听，外部来处理。
  * 注意：释放一定要调用{@link #onDestroy()} ()}
+ *
+ * @author sunhongfa
  */
 public class ADBrowser
     implements ADBrowserLifecycle {

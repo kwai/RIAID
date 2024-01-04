@@ -3,6 +3,7 @@ package com.kuaishou.riaid.adbrowser.action;
 /**
  * RIAID里所有的行为接口，可以是执行转场动画，也可以是发送一个埋点，
  * 通常由{@link com.kuaishou.riaid.adbrowser.trigger.ADTrigger}触发。
+ * @author sunhongfa
  */
 public interface ADAction {
   /**

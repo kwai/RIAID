@@ -1,0 +1,1288 @@
+syntax = "proto3";
+
+package riaid;
+
+option java_multiple_files = true;
+option java_package = "com.kuaishou.riaid.proto";
+option java_outer_classname = "RIAID";
+option objc_class_prefix = "RIAID";
+
+//JAVA ➜ protoc --javanano_out=./libs/proto/src/main/java ./libs/proto/src/main/java/riaid.proto
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//!!!!!注意，proto中的message如果有新增字段，必须在后面添加，不能更改序号。原因是proto解析是顺序解析而非key-value
+/////////////////////// 低版本基础类型定义 start
+
+/** 
+ * Int32 的内部定义。因为目前我们使用的 Protobuff 不支持 optional 定义。而在某些场景下需要定义空值的数据。
+ * 因而我们使用这个方式，来达到 optional 的目的。
+ */
+message Int32Value{
+  int32 value = 1;
+}
+
+/** 
+ * Bool 的内部定义。因为目前我们使用的 Protobuff 不支持 optional 定义。而在某些场景下需要定义空值的数据。
+ * 因而我们使用这个方式，来达到 optional 的目的。
+ */
+message BoolValue{
+  bool value = 1;
+}
+
+/** 
+ * Float 的内部定义。因为目前我们使用的 Protobuff 不支持 optional 定义。而在某些场景下需要定义空值的数据。
+ * 因而我们使用这个方式，来达到 optional 的目的。
+ */
+message FloatValue{
+  float value = 1;
+}
+
+/////////////////////// 低版本基础类型定义 end
+
+
+// RIAID需要支持变量，变量在RIAID生命周期内是全局变量，
+// 且每个变量都有唯一的地址key。
+
+// 变量定义，此变量为全局变量
+message BasicVariable {
+  // 变量的地址，也是唯一标识，要求大于等于零
+  int32 key = 1;
+  // 变量的名字，可以为空
+  string name = 2;
+  // 变量的具体值
+  BasicVariableValue.Value value = 3;
+}
+
+message BasicVariableValue {
+  // 变量支持的类型，包括布尔，长整形，double和字符串
+  enum Type {
+    NONE = 0;
+    BOOL = 1;
+    INTEGER = 2;
+    DOUBLE = 3;
+    STRING = 4;
+  }
+  message Value {
+    Type type = 1;
+    // 布尔类型，默认是false
+    bool b = 2;
+    // integer 类型统一定义为 int64 类型，默认是0
+    int64 i = 3;
+    // 浮点类型 统一定义为 double 类型,默认是0.0
+    double d = 4;
+    // 字符串类型 默认是nil
+    string s = 5;
+  }
+}
+
+/////////////////////// 布局 start
+// 点的坐标，可以是偏移量定义
+message Point{
+  float x = 1;
+  float y = 2;
+}
+
+/** 
+ * 布局属性，通过 Layout 可以控制一个控件在界面上的布局属性。
+ */
+message Layout{
+  // 优先级
+  int32 priority = 1;
+  // 权重，用来均分剩余空间的
+  int32 weight = 2;
+  message Edge{
+    // 横向开始
+    float start = 1;
+    // 横向结束
+    float end = 2;
+    // 纵向顶部
+    float top = 3;
+    // 纵向底部
+    float bottom = 4;
+  }
+  // 组件和组件的距离
+  Edge margin = 3;
+  // 组件的内部边距
+  Edge padding = 4;
+  // 实际服务端下发尺寸
+  float width = 5;
+  // 实际服务端下发宽度
+  float height = 6;
+  // 最大宽度
+  FloatValue max_width = 7;
+  // 最大高度
+  FloatValue max_height = 8;
+}
+
+/////////////////////// 布局 end
+
+/////////////////////// 背景相关 start
+
+/**
+ * 圆角属性控制。通过这个对象，可以控制控件的圆角属性。
+ */
+message CornerRadius{
+  float top_start = 1;
+  float bottom_start = 2;
+  float top_end = 3;
+  float bottom_end = 4;
+}
+
+/**
+ * 渐变属性控制。通过这个对象，可以控制控件的渐变属性。
+ */
+message Gradient{
+  // 渐变类型。目前我们仅支持三种渐变类型。
+  enum GradientType {
+    GRADIENT_TYPE_UNKNOWN = 0;
+    GRADIENT_TYPE_LINEAR = 1;
+  }
+  GradientType type = 1;
+  enum GradientAngle {
+    ANGLE_UNKNOWN = 0;
+    ANGLE_0 = 1;  // 0  左--> 右
+    ANGLE_45 = 2; // 45 左下 --> 右上
+    ANGLE_90 = 3; // 90 下 --> 上
+    ANGLE_135 = 4; // 135 右下 --> 左上
+    ANGLE_180 = 5; // 180 右 --> 左
+    ANGLE_225 = 6; // 225 右上 --> 左下
+    ANGLE_270 = 7; // 270 上 --> 下
+    ANGLE_315 = 8; // 315 左上 --> 右下
+  }
+  // 这个定义枚举过于费力，只能从上诉角度选择
+  GradientAngle angle = 2;
+  repeated string colors = 3;
+}
+// 边框线
+message Stroke{
+  // 边框宽度
+  float width = 1;
+  // 边框颜色
+  string color = 2;
+  // 虚线的宽度，0代表实线
+  float dash_width = 3;
+  // 虚线的间隔
+  float dash_gap = 4;
+}
+// 阴影
+message Shadow{
+  // 水平偏移量
+  float offset_x = 1;
+  // 垂直偏移量
+  float offset_y = 2;
+  // 颜色，很好理解bro
+  string color = 3;
+  // 半径
+  float radius = 4;
+}
+
+/////////////////////// 背景相关 end
+
+/////////////////////// 属性定义 start
+
+message TextAttributes{
+  // 对齐方式
+  message Align{
+    enum Horizontal{
+      HORIZONTAL_UNKNOWN = 0;
+      HORIZONTAL_START = 1;
+      HORIZONTAL_CENTER = 2;
+      HORIZONTAL_END = 3;
+    }
+    enum Vertical{
+      VERTICAL_UNKNOWN = 0;
+      VERTICAL_TOP = 1;
+      VERTICAL_CENTER = 2;
+      VERTICAL_BOTTOM = 3;
+    }
+    // start end center_horizontal
+    Horizontal horizontal = 1;
+    // top bottom center_vertical
+    Vertical vertical = 2;
+  }
+
+  string text = 1;
+  FloatValue font_size = 2;
+  string font_name = 3;
+  string font_color = 4;
+  Int32Value max_lines = 5;
+  enum Ellipsize {
+    ELLIPSIZE_UNKNOWN = 0;
+    ELLIPSIZE_START = 1;
+    ELLIPSIZE_MIDDLE = 2;
+    ELLIPSIZE_END = 3;
+  }
+  Ellipsize ellipsize = 6;
+  Align align = 7;
+  // 是否加粗
+  BoolValue bold = 8;
+  // 是否斜体
+  BoolValue tilt = 9;
+  // 下划线控制
+  enum LineMode{
+    LINE_MODE_UNKNOWN = 0;
+    LINE_MODE_NORMAL = 1;
+    LINE_MODE_UNDERLINE = 2;
+    LINE_MODE_STRIKE_THRU = 3;
+  }
+  LineMode line_mode = 10;
+  // 行间距
+  FloatValue line_space = 11;
+  // 按压态的高亮色
+  string highlight_color = 12;
+  // 富文本
+  message RichText{
+    enum RichAlign{
+      RICH_ALIGN_UNKNOWN = 0;
+      RICH_ALIGN_CENTER = 1;
+      RICH_ALIGN_BOTTOM = 2;
+    }
+    // 匹配文本
+    string place_holder = 1;
+    // 内容
+    Node content = 2;
+    // 响应行为
+    Handler handler = 3;
+    // 富文本对齐方式
+    RichAlign rich_align = 4;
+  }
+  // 富文本集合
+  repeated RichText rich_list = 13;
+
+  // 行高
+  FloatValue line_height = 14;
+}
+
+message ImageAttributes{
+  string url = 1;
+  string highlight_url = 2;
+  enum ScaleType{
+    SCALE_TYPE_UNKNOWN = 0;
+    SCALE_TYPE_FIT_XY = 1;
+    SCALE_TYPE_FIT_END = 2;
+    SCALE_TYPE_FIT_START = 3;
+    SCALE_TYPE_FIT_CENTER = 4;
+    SCALE_TYPE_CENTER = 5;
+    SCALE_TYPE_CENTER_CROP = 6;
+  }
+  // 有以下集中形式
+  ScaleType scale_type = 3;
+  string rtl_url = 4;
+  string rtl_highlight_url = 5;
+  // 值为一个hex的颜色。用于为图像设置着色选项，将除了透明的颜色，其他的颜色全都替换为color_filter指定的颜色
+  string color_filter = 6;
+}
+
+message LottieAttributes{
+  enum ScaleType{
+    SCALE_TYPE_UNKNOWN = 0;
+    SCALE_TYPE_FIT_XY = 1;
+    SCALE_TYPE_FIT_END = 2;
+    SCALE_TYPE_FIT_START = 3;
+    SCALE_TYPE_FIT_CENTER = 4;
+    SCALE_TYPE_CENTER = 5;
+    SCALE_TYPE_CENTER_CROP = 6;
+  }
+  // lottie的链接地址
+  string url = 1;
+  // lottie播放速度
+  FloatValue speed = 2;
+  // 默认开始进度 0~1
+  FloatValue progress = 3;
+  // 是否重复播放，如果否就只播放一次
+  BoolValue repeat = 4;
+  enum RepeatMode{
+    REPEAT_MODE_UNKNOWN = 0;
+    REPEAT_MODE_RESTART = 1; // 重新开始播放
+    REPEAT_MODE_REVERSE = 2; // 播放结束，倒退播放
+  }
+  // 重复播放的模式
+  RepeatMode repeat_mode = 5;
+  // 是否要重新开始播放
+  BoolValue auto_play = 6;
+  message ReplaceText{
+    // 需要被替换的lottie里面的文本
+    string place_holder = 1;
+    // 需要被展示的目标文本
+    string real_text = 2;
+  }
+  message ReplaceImage{
+    // 需要被替换的图片的id
+    string place_image_id = 1;
+    // 需要被替换的图片的地址，可以直接是一个图片链接url
+    string image_address = 2;
+  }
+  message ReplaceKeyPathColor{
+    // 需要替换颜色的key-path
+    repeated string key_path = 1;
+    // 要替换的颜色，hex格式
+    string color = 2;
+  }
+  // 文本替换
+  repeated ReplaceText replace_text_list = 7;
+  // 图片替换
+  repeated ReplaceImage replace_image_list = 8;
+  // Lottie的适配模式
+  ScaleType scale_type = 9;
+  // 替换图片是否支持图片。如果是false，仅支持本地图片下载好了的，才能替换，如果是true，则可以在播放期间下载图片并替换
+  bool replace_image_support_net = 10;
+  // lottie路径颜色替换
+  repeated ReplaceKeyPathColor replace_key_path_color_list = 11;
+}
+
+message ScrollAttributes{
+  BoolValue show_scrollbar = 1 ;
+}
+
+message ButtonAttributes{
+  message HighlightState {
+    int32 key = 1;
+    Attributes attributes = 2;
+  }
+  Node content = 1;
+  repeated HighlightState highlight_state_list = 2;
+}
+
+// 新增Video属性对象
+message VideoAttributes{
+  enum AdapterType{
+    ADAPTER_TYPE_UNKNOWN = 0;
+    ADAPTER_TYPE_CENTER_CROP = 1;
+    ADAPTER_TYPE_INSPIRE = 2;
+    ADAPTER_TYPE_AUTO = 3;
+  }
+  // 是否静音
+  BoolValue auto_mute = 1;
+  // 是否循环播放
+  BoolValue auto_loop = 2;
+  // 视频进度，理解为seek
+  int64 auto_seek_time = 3;
+  // 是否自动播放
+  BoolValue auto_play = 4;
+  // 视频链接
+  string url = 5;
+  // 首帧图片
+  string cover_url = 6;
+  // manifest
+  string manifest = 7;
+  // 视频适配模式
+  AdapterType adapter_type = 8;
+  // 不透明，如果没赋值默认为false，也就是默认透明
+  BoolValue opaque = 9;
+}
+
+// 锚点组的属性对象
+message AnchorGroupAttributes{
+  message AnchorItemAttributes{
+    enum AnchorInfoVerticalAlign{
+      // 默认是居上
+      ANCHOR_VERTICAL_UNKNOWN = 0;
+      // 锚点x与锚点信息顶部对齐，计算纵向的偏移量
+      ANCHOR_VERTICAL_TOP = 1;
+      // 锚点中心与锚点信息中心对齐，计算纵向的偏移量
+      ANCHOR_VERTICAL_CENTER = 2;
+      // 锚点底部与锚点信息底部对齐，计算纵向的偏移量
+      ANCHOR_VERTICAL_BOTTOM = 3;
+    }
+    // 锚点渲染Node
+    Node anchor_point = 1;
+    // 锚点在安全区内的横坐标
+    int32 anchor_point_x = 2;
+    // 锚点在安全区的纵坐标
+    int32 anchor_point_y = 3;
+    // 锚点边侧信息的渲染Node
+    Node anchor_info = 4;
+    // 锚点边侧信息Node距离锚点横坐标的偏移量（横向偏移量为正数）
+    float anchor_info_start_offset_point_x = 5;
+    // 锚点边侧信息Node距离锚点纵坐标的偏移量，纵坐标的偏移量要与align结合使用 (纵向偏移量可以为负数)
+    float anchor_info_align_offset_point_y = 6;
+    // 埋点边侧信息Node纵坐标相对于锚点原点的对齐方式
+    AnchorInfoVerticalAlign anchor_vertical_align = 7;
+  }
+  // 可以支持多个锚点，锚点间是独立的，只不过是在同一个安全区内，位置可以重叠
+  repeated AnchorItemAttributes items = 1;
+}
+
+// 这个是基础通用属性
+message CommonAttributes{
+  enum ShapeType {
+    SHAPE_TYPE_UNKNOWN = 0;
+    SHAPE_TYPE_RECTANGLE = 1;
+  }
+  ShapeType shape_type = 1 ;
+  // 背景圆角
+  CornerRadius corner_radius = 2;
+  // 背景色 ARGB 8位16进制
+  string background_color = 3;
+  // 渐变
+  Gradient gradient = 4;
+  // 边框线
+  Stroke stroke = 5;
+  // 阴影
+  Shadow shadow = 6;
+  // 透明度,0~1数值越小越透明
+  FloatValue alpha = 7;
+  // 是否隐藏不可见
+  BoolValue hidden = 8;
+}
+
+/////////////////////// 属性定义 end
+
+/////////////////////// 行为定义 start
+
+message Responder{
+  // triggerKey数组
+  repeated int32 trigger_keys = 1;
+}
+
+message Handler{
+  Responder click = 1;
+  Responder double_click = 2;
+  Responder long_press = 3;
+}
+
+//高级手势
+message GestureModel {
+  // 滑动
+  SwipeGesture swipe = 1;
+}
+
+// 滑动手势
+message SwipeGesture {
+  // swipe手势方向枚举
+  enum GestureSwipeDirection {
+    SWIPE_DIRECTION_NONE = 0;
+    // 右
+    SWIPE_DIRECTION_RIGHT = 1;
+    // 左
+    SWIPE_DIRECTION_LEFT = 2;
+    // 上
+    SWIPE_DIRECTION_UP = 3;
+    // 下
+    SWIPE_DIRECTION_DOWN = 4;
+  }
+  // 手势对应触发的triggers
+  repeated int32 trigger_keys = 1;
+
+  // 滑动方向
+  GestureSwipeDirection direction = 2;
+}
+
+// 这个是视频控件独有的，不通用，不放在点击的Handler里面
+message VideoHandler {
+  // 首帧
+  Responder impression = 1;
+  // 播放完成
+  Responder finish = 2;
+  // 播放暂停
+  Responder pause = 3;
+  // 播放
+  Responder start = 4;
+  // 将暂停的video播放
+  Responder resume = 5;
+}
+
+// 这个是Lottie控件独有的，不通用，不放在点击的Handler里面
+// Lottie是可以替换图片的，如果有替换图片的配置，会调用相关的Responder
+message LottieHandler {
+  // 动画开始播放
+  Responder start = 1;
+  // 动画播放完成
+  Responder end = 2;
+  // 替换图片成功
+  Responder replace_image_success = 3;
+  // 替换图片失败
+  Responder replace_image_false = 4;
+}
+
+/////////////////////// 行为定义 end
+
+
+/////////////////////// 这些是具体的render对象定义 start
+
+message Attributes{
+  CommonAttributes common = 1;
+  TextAttributes text = 2;
+  ImageAttributes image = 3;
+  LottieAttributes lottie = 4;
+  ScrollAttributes scroll = 5;
+  ButtonAttributes button = 6;
+  VideoAttributes video = 7;
+  AnchorGroupAttributes anchor_group = 8;
+  enum AttributeType{
+    // 未知属性
+    ATTRIBUTE_UNKNOWN = 0;
+    // 视频的当前播放位置，单位：ms
+    ATTRIBUTE_VIDEO_POSITION = 1;
+    // 视频的总播放时长，累加，单位：ms
+    ATTRIBUTE_VIDEO_TOTAL_DURATION = 2;
+    //.... 其他属性类型待扩展
+  }
+}
+
+message Node{
+  // 可支持点击等事件的类型：1，2，4，6
+  enum ClassType {
+
+    CLASS_TYPE_UNKNOWN = 0;
+    // 子组件
+    CLASS_TYPE_ITEM_IMAGE = 1;
+    CLASS_TYPE_ITEM_LOTTIE = 2;
+    CLASS_TYPE_ITEM_SPACE = 3;
+    CLASS_TYPE_ITEM_TEXT = 4;
+    // 盒子组件
+    CLASS_TYPE_LAYOUT_ABSOLUTE = 5;
+    CLASS_TYPE_LAYOUT_BUTTON = 6;
+    CLASS_TYPE_LAYOUT_HORIZONTAL = 7;
+    CLASS_TYPE_LAYOUT_H_SCROLL = 8;
+    CLASS_TYPE_LAYOUT_SQUARE = 9;
+    CLASS_TYPE_LAYOUT_VERTICAL = 10;
+    CLASS_TYPE_LAYOUT_V_SCROLL = 11;
+
+    CLASS_TYPE_ITEM_VIDEO = 12;
+    // 锚点盒子，内部只包裹锚点。有安全区的概念，对应的属性为AnchorGroupAttributes
+    CLASS_TYPE_ITEM_ANCHOR = 13;
+  }
+  // 当前组件的类型
+  ClassType class_type = 1;
+  // 当前组件的唯一标识
+  // 当前组件的唯一标识
+  int32 key = 2;
+  // 当前组件的布局属性，尺寸，距离等
+  Layout layout = 3;
+  // 当前组件的响应的行为
+  Handler handler = 4;
+  // 当前组件的样式属性
+  Attributes attributes = 5;
+  // 子组件，只有盒子布局这个属性才会有意义
+  repeated Node children = 6;
+  // 用来说明该Node是做什么用的，简单描述
+  string debug_info = 7;
+  // 视频的监听
+  VideoHandler video_handler = 8;
+  // Lottie的监听
+  LottieHandler lottie_handler = 9;
+  // 支持高级手势
+  repeated GestureModel gestures = 10;
+}
+
+/////////////////////// 这些是具体的render对象定义 start
+
+
+
+/*↓↓↓↓↓↓↓↓↓↓↓↓↓ 这些是具体的browser对象定义 ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓*/
+
+// 用以记录Browser当前的条件，概念类似于环境变量
+message ADConditionModel{
+  // 条件的名字
+  string condition_name = 1;
+  // 条件对应的值
+  string condition_value = 2;
+}
+
+// 比较运算符
+enum CompareOperator{
+  // 不识别
+  COMPARE_OPERATOR_UNKNOWN = 0;
+  // 相等
+  COMPARE_OPERATOR_EQUAL = 1;
+  // 不相等
+  COMPARE_OPERATOR_NOT_EQUAL = 2;
+  // 小于
+  COMPARE_OPERATOR_LESS_THAN = 3;
+  // 大于
+  COMPARE_OPERATOR_GREATER_THAN = 4;
+  // 小于等于
+  COMPARE_OPERATOR_LESS_THAN_OR_EQUAL = 5;
+  // 大于等于
+  COMPARE_OPERATOR_GREATER_THAN_OR_EQUAL = 6;
+}
+
+// 逻辑运算符-与、或、非
+enum LogicOperator {
+  // 不识别
+  LOGIC_OPERATOR_UNKNOWN = 0;
+  // 或
+  LOGIC_OPERATOR_OR = 1;
+  // 与
+  LOGIC_OPERATOR_AND = 2;
+  // 非
+  LOGIC_OPERATOR_NOT = 3;
+}
+
+// 逻辑单元，用以比较condition或variable是否符合逻辑
+// condition和variable只能一个有值
+message ADLogicUnitModel{
+  ADConditionModel condition = 1;
+  // 此compare比较的是condition或variable与全局存储的condition或variable的值
+  CompareOperator compare = 2;
+  BasicVariable variable = 3;
+}
+
+// 如果内部logic，units组成的条件符合，执行action_models
+message ADConditionLogicModel {
+  LogicOperator operator = 1;
+  repeated ADLogicUnitModel units = 2;
+  // Action集合
+  repeated ADActionModel actions = 3;
+}
+
+
+message ADConditionTriggerModel{
+  // condition trigger key
+  int32 key = 1;
+  // ADConditionLogicModel
+  // 同一时间，数组内应当有且仅有一个ADConditionLogicModel是符合执行条件的
+  repeated ADConditionLogicModel logics = 2;
+  // 用来说明该触发器是做什么用的，简单描述。
+  string debug_info = 3;
+}
+
+
+// 所有Trigger的封装类
+// 注意，这里面的成员只能有一个，因为客户端使用的MessageNano，因为解析原因，暂不使用oneof
+message ADTriggerModel {
+  // 定时触发器，例如：3秒后触发操作
+  ADTimeoutTriggerModel timeout = 1;
+  // 心跳触发器，例如：每隔3秒，触发操作
+  ADHeartBeatTriggerModel heartbeat = 2;
+  // 普通触发器
+  ADGeneralTriggerModel general = 3;
+  // 代表一个不确定的操作，需要根据当时的环境变量，来确定具体的操作
+  ADConditionTriggerModel condition = 4;
+  // video计时器的触发器，用来匹配一个video的播放时间，来触发行为
+  ADVideoDurationTimeoutTriggerModel videoDuration = 5;
+  // 设备运动触发器，例：扭一扭、摇一摇
+  ADDeviceMotionTriggerModel deviceMotion = 6;
+}
+
+
+// 定时触发器，例如：3秒后触发操作
+message ADTimeoutTriggerModel {
+  // 触发器的key
+  int32 key = 1;
+  // 触发时机，单位毫秒，例：time=1000，则为1s后触发
+  int64  interval = 2;
+  // Action集合
+  repeated ADActionModel actions = 3;
+  // 用来说明该触发器是做什么用的，简单描述。
+  string debug_info = 4;
+}
+
+// 心跳触发器，例如：每隔3秒，触发操作
+message ADHeartBeatTriggerModel {
+  // 触发器的key
+  int32  key = 1;
+  // 触发间隔，单位毫秒，例：time=1000，每隔1秒，触发一次
+  int64  interval = 2;
+  // 需要执行次数
+  int32  count = 3;
+  // Action集合
+  repeated ADActionModel actions = 4;
+  // 用来说明该触发器是做什么用的，简单描述。
+  string debug_info = 5;
+}
+
+// 普通触发器
+message ADGeneralTriggerModel {
+  // 触发器的key
+  int32 key = 1;
+  // Action集合
+  repeated ADActionModel actions = 2;
+  // 用来说明该触发器是做什么用的，简单描述。
+  string debug_info = 3;
+}
+
+// Video计时器，Time Source是播放器，而不是系统
+message ADVideoDurationTimeoutTriggerModel {
+  // 触发器的key
+  int32 key = 1;
+  // 播放器的key，也可以是外部播放器的key
+  int32 view_key = 2;
+  // 触发时机，单位毫秒，例：time=1000，则为1s后触发
+  int64 interval = 3;
+  // Action集合
+  repeated ADActionModel actions = 4;
+  // 用来说明该触发器是做什么用的，简单描述。
+  string debug_info = 5;
+}
+
+// 轴类型
+enum DeviceAxisType {
+  // 未知
+  DEVICE_AXIS_TYPE_UNKNOWN = 0;
+  // X轴
+  DEVICE_AXIS_TYPE_X = 1;
+  // Y轴
+  DEVICE_AXIS_TYPE_Y = 2;
+  // Z轴
+  DEVICE_AXIS_TYPE_Z = 3;
+}
+
+// 轴的逻辑单元
+message DeviceAxisUnitModel {
+  // 轴类型
+  DeviceAxisType type = 1;
+  // 临界值
+  // 扭一扭场景：临界值为陀螺仪旋转速率，单位：弧度/秒。若临界值为2*PI，代表每秒钟旋转了360度。
+  // 摇一摇场景：临界值沿x/y/z轴的加速力（不包括重力)，单位：米/秒²。
+  float threshold = 2;
+  // 比较运算符
+  CompareOperator compare = 3;
+}
+
+// 设备轴的条件集合
+message DeviceAxisConditionModel {
+  // 轴逻辑单元数组
+  repeated DeviceAxisUnitModel units = 1;
+  // 逻辑运算符，判断条件数组是与或非的依据
+  LogicOperator operator = 2;
+}
+
+// 设备运动触发器
+message ADDeviceMotionTriggerModel {
+  // 设备运动类型
+  enum DeviceMotionType {
+    DEVICE_MOTION_TYPE_UNKNOWN = 0;
+    // 设备加速度
+    DEVICE_MOTION_TYPE_USERACCELERATION = 1;
+    // 旋转加速度
+    DEVICE_MOTION_TYPE_ROTATIONRATE = 2;
+  }
+
+  // 触发器的key
+  int32 key = 1;
+
+  // 设备运动类型
+  DeviceMotionType motion_type = 2;
+
+  // 触发条件
+  DeviceAxisConditionModel condition = 3;
+
+  // 满足条件会响应的Action
+  repeated ADActionModel actions = 4;
+}
+
+// 所有TransitionModel的封装类
+// 注意，这里面的成员只能有一个，因为客户端使用的MessageNano，因为解析原因，暂不使用oneof
+message ADTransitionModel {
+  // 场景可见性转场描述
+  ADVisibilityTransitionModel visibility = 1;
+  // 场景模板转场描述
+  ADTemplateTransitionModel template = 2;
+  // 场景位置更改转场描述
+  ADTranslationTransitionModel translation = 3;
+  // 场景内的转场动画
+  ADInSceneAnimationTransitionModel in_scene_animation = 4;
+  // 场景与场景的共享元素转场过渡动画
+  ADSceneShareTransitionModel scene_share = 5;
+  // LottieTransitionModel
+  ADLottieTransitionModel lottie = 6;
+  // 场景内的特定Transition，用于更新render的内容
+  ADRenderContentTransitionModel render_content = 7;
+  // 场景间贝塞尔曲线转场
+  ADBezierTransitionModel bezier = 8;
+}
+
+// 场景可见性转场描述
+message ADVisibilityTransitionModel{
+  int32 scene_key = 1; // Transition对应的场景
+  int64 duration = 2; // ms，动画执行的时间
+  // [0-1]
+  float start_alpha = 3;
+  float end_alpha = 4;
+  // 目标状态要求是可见还是不可见
+  bool hidden = 5;
+}
+
+// 场景模板转场描述
+message ADTemplateTransitionModel{
+  int32 scene_key = 1;
+  int64 duration = 2;
+  TemplateType template = 3;
+  enum TemplateType{
+    TEMPLATE_TYPE_NONE = 0;
+    /**
+    * 从左边进入
+    */
+    ENTER_FROM_START = 1;
+    /**
+    * 从左边移出
+    */
+    EXIT_FROM_START = 2;
+  }
+}
+
+// 场景位置更改转场描述
+message ADTranslationTransitionModel{
+  int32 scene_key = 1;
+  int64 duration = 2;
+  repeated ADSceneRelationModel scene_relations = 3;
+}
+
+// 场景内的转场动画
+message ADInSceneAnimationTransitionModel{
+  int32 view_key = 1;
+  int32 scene_key = 2[deprecated = true];
+  ADAnimationModel animation = 3;
+}
+
+// 场景与场景的共享元素转场过渡动画
+// 给到两个scene，两个scene若复用view，则其viewKey相同。如复用的view为ActionButton，SceneA的ActionButton作为起始态，SceneB
+// 的ActionButton作为最终态，然后执行动画
+message ADSceneShareTransitionModel{
+  // Transition对应的场景，作为起始态
+  int32 start_scene_key = 1;
+  // Transition对应的目标场景，作为最终态
+  int32 end_scene_key = 2;
+  // ms，起始态到最终态的动画时间。
+  int64 duration = 3;
+}
+
+message ADLottieTransitionModel {
+  // 支持lottie的具体场景
+  int32 scene_key = 1;
+  // lottie的类型，目前支持progress
+  string lottie_type = 2;
+  // 可以为空，如果为空，则是该场景下支持lottie的所有组件改变状态
+  repeated int32 view_keys = 3;
+  // 最大的进度，如倒计时6s，则maxProgress为6000
+  int64 max_progress = 4;
+  // lottie状态更新间隔，如倒计时6s，每隔100ms触发一次状态，则interval为100
+  int64 interval = 5;
+}
+
+// 场景内的特定Transition，用于更新render的内容
+message ADRenderContentTransitionModel {
+  // 要更新render内容的场景
+  int32 scene_key = 1[deprecated = true];
+  // 要更新的render其中的view
+  int32 view_key = 2;
+  // 要更新的属性
+  Attributes render_attributes = 3;
+}
+
+// 贝塞尔曲线的场景位移转场动画，这里支持的是三阶贝塞尔曲线，当其中一个控制点值为空时，可以认为是二阶贝塞尔曲线。
+// 这里曲线起始点、结束点、控制点的坐标均参考指定场景的坐标位置。
+message ADBezierTransitionModel{
+  // 要开始执行贝塞尔曲线动画的场景，也就是起点
+  int32 start_scene_key = 1;
+  // 贝塞尔曲线动画执行到终点的场景
+  int32 target_scene_key = 2;
+
+  // 贝塞尔曲线终点x坐标，相对于场景target_scene的x的偏移量，正数为偏右，负数为偏左
+  // 贝塞尔曲线终点y坐标，相对于场景target_scene的y的偏移量，正数为偏下，负数为偏上
+  Point end_point_offset_target_scene = 3;
+
+  // 贝塞尔曲线控制点一的x坐标，相对于场景start_scene的x的偏移量，正数为偏右，负数为偏左
+  // 贝塞尔曲线控制点一的y坐标，相对于场景start_scene的y的偏移量，正数为偏下，负数为偏上
+  Point control_first_point_offset_start_scene = 4;
+
+  // 贝塞尔曲线控制点二的x坐标，相对于场景target_scene的x的偏移量，正数为偏右，负数为偏左
+  // 贝塞尔曲线控制点二的y坐标，相对于场景target_scene的y的偏移量，正数为偏下，负数为偏上
+  Point control_second_point_offset_target_scene = 5;
+
+  // 执行时长，ms
+  int64 duration = 6;
+}
+
+// 广告的动画定义，用来描述了属性动画的一些配置 6
+message ADAnimationModel{
+  ViewPropertyType property_type = 1;
+  int64 duration = 2;
+  // 如果等于-1则是重复执行
+  int32 repeat_count = 3;
+
+  // 如果是宽或高的值，则-1是认为渲染好的宽高
+  repeated float values = 4;
+
+  // x轴的轴点，如果为空，则默认为x轴中心点，用于缩放
+  FloatValue PivotX = 5;
+  // y轴的轴点，如果为空，则默认为y轴中心点，用于缩放
+  FloatValue PivotY = 6;
+
+  // 视图的一些属性
+  enum ViewPropertyType{
+    VIEW_PROPERTY_NONE = 0;
+    /**
+     * 参考{@link android.view.View#ALPHA}
+     */
+    ALPHA = 1;
+    /**
+     * 参考{@link android.view.View#SCALE_X}+{@link android.view.View#SCALE_Y}
+     */
+    SCALE = 2;
+    /**
+     * 参考{@link android.view.View#ROTATION}
+     */
+    ROTATION = 3;
+    /**
+     * 持续更改View宽度的{@link android.animation.ValueAnimator}
+     * 当等于-1则认为是view经过计算后的值
+     */
+    WIDTH = 4;
+    /**
+     * 持续更改View高度的{@link android.animation.ValueAnimator}
+     * 当等于-1则认为是view经过计算后的值
+     */
+    HEIGHT = 5;
+    // values长度是1，只有一个值
+    //可见，可响应点击事件,value = 0
+    //不可见，会占用空间，但不能响应点击事件，value = 1
+    HIDDEN = 6;
+  }
+}
+
+// 所有Action的封装类
+// 注意，这里面的成员只能有一个，因为客户端使用的MessageNano，因为解析原因，暂不使用oneof
+message ADActionModel {
+  // 所有Transition的行为，通常用于场景的转场或场景内动画
+  ADTransitionActionModel transition = 1;
+  // 埋点的Action，由上层解析和发送
+  ADTrackActionModel track = 2;
+  // 视频播放控制的Action
+  ADVideoActionModel video = 3;
+  // url的Action，可以是直接跳转落地页，也可以转化跳转
+  ADUrlActionModel url = 4;
+  // 条件变化Action
+  ADConditionChangeActionModel condition_change = 5;
+  // 取消一个正在进行中的timerTrigger
+  ADCancelTimerActionModel cancel_timer = 6;
+  // 自定义的行为，用于透传的
+  ADCustomActionModel custom = 7;
+  // 触发一个Trigger
+  ADTriggerActionModel trigger = 8;
+  // 转化跳转的action
+  ADConversionActionModel conversion = 9;
+  // 分步执行的action，处理一个变量
+  ADStepActionModel step = 10;
+  // 变量变化action
+  ADVariableChangeActionModel variable_change = 11;
+  // 取消设备运动Action
+  ADCancelDeviceMotionActionModel cancel_device_motion = 12;
+  // 设备震动Action
+  ADVibratorActionModel vibrator = 13;
+  // 提示音Action
+  ADBeepActionModel beep = 14;
+  // 控制Lottie
+  ADLottieActionModel lottie = 15;
+  // 控制视图的是否可点击
+  ADClickableActionModel clickable = 16;
+  // 弹出toast
+  ADToastActionModel toast = 17;
+  // 执行某些内置函数的行为
+  ADExecuteFunctionActionModel function = 18;
+  // 动态埋点的行为
+  ADDynamicTrackActionModel dynamic = 19;
+}
+
+// 控制视图是否可点击的行为，即使是设置点击的handler，如果clickable为false，也不支持点击。
+message ADClickableActionModel {
+  // 视图的key
+  int32 view_key = 1;
+  // false: 不支持点击  true: 支持点击
+  bool clickable = 2;
+}
+
+// 展示一个toast，暂不自定义，使用系统的toast
+message ADToastActionModel{
+  string content = 1;
+  ToastType toast_type = 2;
+  // toast展示时间，有则生效
+  Int32Value duration = 3;
+  // toast的类型
+  enum ToastType{
+    INFO = 0;
+    NOTIFY = 1;
+    ALERT = 2;
+  }
+}
+// 执行指定的function
+message ADExecuteFunctionActionModel {
+  repeated int32 function_keys = 1;
+}
+
+// 提示音Action
+message ADBeepActionModel {
+  // url可以是本地资源，也可以是服务端资源
+  // 本地资源格式：file://xxxx，服务端资源格式：https://xxxxx
+  string url = 1;
+}
+
+// 设备震动Action
+message ADVibratorActionModel {}
+
+/// 取消对该设备运动Trigger监听
+message ADCancelDeviceMotionActionModel {
+  int32 trigger_key = 1;
+}
+
+// 所有Transition的行为，通常用于场景的转场或场景内动画
+message ADTransitionActionModel{
+  // 作为唯一标识
+  int32 key = 1;
+  // Transition数组
+  repeated ADTransitionModel transitions = 2;
+}
+
+// ADStepActionModel是一个分步的行为，分步行为需要对变量操作value+step，
+// 变量操作之后会对这个变量做内置函数的处理，最后触发触发器
+message ADStepActionModel{
+  // 变量操作不能超过这个最大值，如果超过了自动停止
+  int32 max = 1;
+  // 变量操作不能小于这个最小值，如果小于了自动停止
+  int32 min = 2;
+  // 间隔，可正可负
+  int32 step = 3;
+  // 变量的地址，这个变量的Type要求是INTEGER
+  int32 variable_key = 4;
+  // 每步操作完变量后要执行的触发器
+  repeated int32 trigger_keys = 5;
+}
+
+// 埋点的Action，由上层解析和发送，这个行为透传给上层处理
+message ADTrackActionModel{
+  // 例如：[actionType=2, templateType=1]
+  map<string, string> parameters = 1;
+  // 埋点模型下，嵌套动态埋点模型
+  ADDynamicTrackActionModel dynamic = 2;
+}
+
+// 视频播放控制的Action，这个行为透传给上层处理
+message ADVideoActionModel{
+  VideoControlType type = 1;
+  enum VideoControlType{
+    VIDEO_NONE = 0;
+    // 重新播放视频
+    VIDEO_REPLAY = 1;
+    // 视频得到位置回到首帧，但不会重新播放
+    VIDEO_POSITION_RESET = 2;
+    // 新增暂停视频能力
+    VIDEO_PAUSE = 3;
+    // 新增继续播放控制能力
+    VIDEO_PLAY = 4;
+    // 静音
+    VIDEO_SOUND_TURN_ON = 5;
+    // 解除静音
+    VIDEO_SOUND_TURN_OFF = 6;
+  }
+  // render_key 都不等于0，才是内部的
+  int32 view_key = 2;
+}
+
+
+// Lottie播放控制的Action
+message ADLottieActionModel{
+  LottieControlType type = 1;
+  enum LottieControlType{
+    LOTTIE_NONE = 0;
+    // 重新播放动画
+    LOTTIE_REPLAY = 1;
+    // 动画位置回到首帧，但不会重新播放
+    LOTTIE_POSITION_RESET = 2;
+    // 新增暂停动画能力
+    LOTTIE_PAUSE = 3;
+    // 新增继续播放控制能力
+    LOTTIE_PLAY = 4;
+  }
+  // render_key 都不等于0，才是内部的
+  int32 view_key = 2;
+}
+
+// url的Action，如直接跳转落地的，这个行为透传给上层处理
+message ADUrlActionModel{
+  // 要跳转的url
+  string url = 1;
+  // 可能要透传的打包数据
+  map<string, string> bundle = 2;
+}
+
+// 有转化的跳转url，这个行为透传给上层处理
+message ADConversionActionModel{
+  // 要跳转的url
+  string url = 1;
+  // 要跳转的deep_link，可以是跳转应用
+  string deep_link = 2;
+  // 可能要透传的打包数据
+  map<string, string> bundle = 3;
+}
+
+// 条件变化Action
+message ADConditionChangeActionModel{
+  // 条件模型
+  ADConditionModel condition = 1;
+}
+
+// 变量变化的action
+message ADVariableChangeActionModel{
+  // 变量模型
+  BasicVariable variable = 1;
+}
+
+/**
+ * 作用: 取消一个正在进行中的时间控制器
+ * 概念解释：
+ * 1.时间触发器: RIAID 协议中定义的用于触发时间控制的概念。目前有两种，分别为:定时操作(ADTimeoutTriggerModel),心跳操作
+ * (ADHeartBeatTriggerModel)。
+ * 2.时间控制器: 引擎实现的时候，对于时间触发器的一个实例化，负责进行具体的时间控制行为。
+ * 3.时间控制器与时间触发器，维持1:1的关系。在同一个时刻，一个时间触发器只能实例化一个时间控制器。
+ * 具体功能描述: 通过trigger_key获得对应的时间触发器，取消该时间触发器对应的时间控制器。
+ * 注意: 这里取消的是时间控制器，而非时间触发器。
+ */
+message ADCancelTimerActionModel{
+  // 一个ADTimeoutTriggerModel的key或者是一个ADHeartBeatTriggerModel的key
+  int32 trigger_key = 1;
+}
+
+// 自定义的行为，用于透传的
+message ADCustomActionModel{
+  map<string, string> parameters = 1;
+}
+
+// 触发一个Trigger
+message ADTriggerActionModel {
+  repeated int32 trigger_keys = 1;
+}
+
+// 动态埋点 Action，由上层解析和发送，这个行为透传给上层处理
+message ADDynamicTrackActionModel {
+  // 动态下发埋点脚本,编写相应的脚本字符串
+  string script = 1;
+}
+
+// 渲染对象的包裹
+message ADRenderWrapModel{
+  // 通过构建的Render对象，获取视图
+  Node render_data = 1;
+}
+
+// Scene生命周期模型
+message ADSceneLifeCycleModel {
+  // Scene展示时需要触发的TriggerKeys，hidden=false
+  repeated int32 appear_trigger_keys = 1;
+  // Scene消失时需要触发的TriggerKeys，hidden=true
+  repeated int32 disappear_trigger_keys = 2;
+}
+
+// ADBrowser生命周期模型
+message ADBrowserLifeCycleModel {
+  // RIAID所在的页面推入或从后台切换到前台。对齐Android的onResume和iOS的onDidAppear以及从后台切换到前台
+  repeated int32 appear_trigger_keys = 1;
+  // RIAID所在的页面压栈或从前台切换到后台。对齐Android的onPause和iOS的onDidDisappear以及从前台切换到后台
+  repeated int32 disappear_trigger_keys = 2;
+  // 加载广告，例如广告滑入时会调用。一般我们会在广告进入时，去触发广告场景开始展示。
+  repeated int32 load_trigger_keys = 3;
+  // 卸载广告，例如广告滑出时调用。
+  repeated int32 unload_trigger_keys = 4;
+}
+
+// 场景的model，用对场景的描述
+message ADSceneModel{
+  int32 key = 1;
+  ADRenderWrapModel render = 2;
+  // 用来说明该场景是做什么用的，简单描述。
+  string debug_info = 3;
+  // 场景生命周期
+  ADSceneLifeCycleModel life_cycle = 4;
+}
+
+// 声明本场景与目标的关系
+// 具体用法：
+// 以target为基准，固定source的位置
+// source的sourceEdge在target的targetEdge
+// source的sourceEdge相对于target的targetEdge的距离为distance
+// 注意：
+// - sourceEdge与targetEdge必须成对存在，方向也成对存在，横向有start和end，纵向有top和bottom，如sourceEdge声明为横向，则targetEdge
+// 也必须为横向。
+// - ADSceneRelation通常是组合使用，source两个方向都应该有约束，若其中一个方向没有约束，则认为该方向相对于Canvas居中。
+// - 单一坐标轴上只需要描述一个边缘即可。
+// - 不能重复描述一个元素同一个边缘的约束关系。
+// - 同一个钢性元素，需要同时描述纵向和横向的边缘。
+// - 若target为canvas，仅支持同一个方向的约束，例：支持sourceEdge=start，targetEdge=start，不支持sourceEdge=start
+// ，targetEdge=end。
+message ADSceneRelationModel{
+  // 场景的key
+  int32 source_key = 1;
+  // 场景的key,特殊说明Canvas
+  int32 target_key = 2;
+  //设计稿的逻辑像素
+  float distance = 3;
+  // 本场景的边
+  SceneEdge source_edge = 4;
+  // 目标场景的边
+  SceneEdge target_edge = 5;
+
+  enum SceneEdge{
+    SCENE_EDGE_NONE = 0;
+    // 左边，RTL为右边
+    START = 1;
+    // 上边
+    TOP = 2;
+    // 右边，RTL为左边
+    END = 3;
+    // 下边
+    BOTTOM = 4;
+  }
+}
+
+// 有返回值的内置函数
+// 只能有一个function
+message ADFunctionModel{
+  ADReadAttributeFunctionModel read_attribute = 1;
+  ADAppInstalledFunctionModel app_installed = 2;
+}
+
+// 读取Node属性的内置函数，返回值类型默认是字符串
+// 目前仅用于埋点中存在${in_fun_key}时，需要调用这个内置函数，并将其返回值替换掉${in_fun_key}
+message ADReadAttributeFunctionModel{
+  // 内置函数的唯一地址
+  int32 key = 1;
+  // Node的id
+  int32 view_key = 2;
+  // 属性名
+  Attributes.AttributeType attribute_type = 3;
+}
+
+// 指定的app是否安装，返回值类型是bool类型
+message ADAppInstalledFunctionModel{
+  // 内置函数的唯一地址
+  int32 key = 1;
+  // 要判断的app包名，满足数组中其中一个就认为是已安装
+  repeated string app_pkg_names = 2;
+  // 结果给到指定的变量，这个变量应该是个bool类型
+  int32 variable_key = 3;
+}
+
+// 广告dsl配置的数据模型，输入到ADDirector中
+message RiaidModel{
+  // ADBrowser生命周期
+  ADBrowserLifeCycleModel life_cycle = 1;
+  // 所有的场景集合
+  repeated ADSceneModel scenes = 2;
+  // scene的位置关系，用于定义scene在整个广告画布中的位置，用正则表达式解析。
+  repeated ADSceneRelationModel default_scene_relations = 3;
+  // 触发器集合，所有触发器提前在此下发，之后再使用，直接用TriggerKey调用。
+  repeated ADTriggerModel triggers = 4;
+  // 起始默认的条件。作用类似环境变量，用作表述当前的状态。作为不确定操作的判断依据。
+  repeated ADConditionModel default_conditions = 5;
+  // 起始默认的变量，可被操作的所有的全局变量
+  repeated BasicVariable default_variables = 6;
+  // 内置函数集合，所有函数提前在此下发，之后使用，可通过${functionKey}调用
+  repeated ADFunctionModel functions = 7;
+  // 对外暴露的触发器，外部可直接调用，如接口请求成功后需要显示某个场景
+  repeated int32 export_trigger_keys = 8;
+  // 模板的key，也就是模板的名字，不应该重复
+  string key = 9;
+}
+
+message SystemKeyEnum{
+  enum SystemKeys{
+    // 无效的key，适用于Riaid数据模型中定义的所有key，例:viewKey、sceneKe、triggerKey等
+    INVALID_KEY = 0;
+    // 视频播放结束的内置触发器的key
+    TRIGGER_KEY_AD_VIDEO_END = -6662;
+    // 如果sceneKey是SCENE_KEY_CANVAS，认为是画布
+    SCENE_KEY_CANVAS = -6661;
+  }
+}
+/*↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 这些是具体的browser对象定义 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑*/

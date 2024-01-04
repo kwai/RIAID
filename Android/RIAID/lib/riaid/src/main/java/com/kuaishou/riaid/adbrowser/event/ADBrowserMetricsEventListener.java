@@ -17,6 +17,7 @@ import com.kuaishou.riaid.proto.nano.ADVideoActionModel;
  * 添加到{@link com.kuaishou.riaid.adbrowser.ADBrowser}的
  * {@link ADBrowserContext}中。
  * 监听通常由{@link com.kuaishou.riaid.adbrowser.action.ADAction}回调。
+ * @author sunhongfa
  */
 public interface ADBrowserMetricsEventListener {
   /**

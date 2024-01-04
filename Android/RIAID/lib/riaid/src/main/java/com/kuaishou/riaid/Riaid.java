@@ -9,6 +9,7 @@ import com.kuaishou.riaid.proto.nano.ADReadAttributeFunctionModel;
 
 /**
  * 负责整个RIAID的初始化和配置工作
+ * @author sunhongfa
  */
 public class Riaid {
   private static final Riaid INSTANCE = new Riaid();

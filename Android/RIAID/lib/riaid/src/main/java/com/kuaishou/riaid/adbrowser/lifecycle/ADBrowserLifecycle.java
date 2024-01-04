@@ -4,6 +4,7 @@ import com.kuaishou.riaid.adbrowser.ADBrowser;
 
 /**
  * 定义的{@link ADBrowser}的生命周期，由自己来回调调用的。
+ * @author sunhongfa
  */
 public interface ADBrowserLifecycle {
 

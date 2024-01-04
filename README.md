@@ -45,8 +45,6 @@ Interactive Ad Interface Definition （RIAID）协议。
 - 具备一定的图灵完备性，可以模拟复杂逻辑
 
 
-
-
 ## 架构图
 
 ![img.png](image/pic.png)
@@ -64,3 +62,20 @@ Interactive Ad Interface Definition （RIAID）协议。
 正因为这些抽象的定义，可以通过类型组合来实现千变万化的广告可能，从而覆盖海外快手的任意广告形式。
 比如说，通过监听运动传感器实现开屏扭一扭；通过定时器，在广告播放第三秒的时候，将某个场景通过贝塞尔曲线动画
 移动到指定的位置；我们还可以实现元素共享的复杂动画，这些广告功能都可以通过简单的协议声明就可以实现。
+
+## 已申请专利
+- [页面渲染方法、装置、电子设备及存储介质](https://www.incopat.com/detail/init2?formerQuery=iUgqGEWjUQV9WtbjX9smZzlbGWMUeMb7dkC5wfiuCUw%3D&local=zh)
+- [动画渲染方法、装置、电子设备及存储介质](https://www.incopat.com/detail/init2?formerQuery=ewz0Mc6WRbJ9ci%2FZjI7QfDlbGWMUeMb7dkC5wfiuCUw%3D&local=zh)
+- [一种对象处理方法、装置、电子设备及存储介质](https://www.incopat.com/detail/init2?formerQuery=zEbJ6%2F3NA89uC8gDZsscDTlbGWMUeMb7dkC5wfiuCUw%3D&local=zh)
+- [一种事件执行方法、装置、电子设备及存储介质](https://www.incopat.com/detail/init2?formerQuery=%2FIAu5dQxITFfKjh1CDLrajlbGWMUeMb7dkC5wfiuCUw%3D&local=zh)
+- [场景画面显示方法、装置、电子设备及存储介质](https://www.incopat.com/detail/init2?formerQuery=KN3gEwYlqk2RdtyOoa8NlDlbGWMUeMb7dkC5wfiuCUw%3D&local=zh)
+- [业务更新处理方法、装置、电子设备及存储介质](https://www.incopat.com/detail/init2?formerQuery=sfLJKyv4Dl66SGyLM41U8zlbGWMUeMb7dkC5wfiuCUw%3D&local=zh)
+- [一种组件布局方法、装置、电子设备及存储介质](https://www.incopat.com/detail/init2?formerQuery=JdoRGU3KRtGTevnZ88LMQTlbGWMUeMb7dkC5wfiuCUw%3D&local=zh)
+
+## 示例
+
+![splash_twist_ad.gif](image/splash_twist_ad.gif)
+
+
+![reward_ad.gif](image/reward_ad.gif)
+

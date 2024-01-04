@@ -7,6 +7,7 @@ package com.kuaishou.riaid.adbrowser.timer;
  * 使用完成后，在 ADBrowser 中的时间控制器立刻销毁。同时，
  * 时间控制器支持``销毁``操作。可以通过{@link com.kuaishou.riaid.proto.nano.ADCancelTimerActionModel}
  * 来找到销毁一个时间控制器。
+ * @author sunhongfa
  */
 public interface TimeController {
   /**

@@ -14,6 +14,7 @@ import com.kuaishou.riaid.adbrowser.logger.ADBrowserLogger;
  * 广告画布，在广告渲染的时候，一般宿主会给一定的空间。把这个可以在其上叠加广告的空间称之为 ADCanvas。
  * 例如在 Feed 流广告中，把可以用来渲染广告的区域都称为 ADCanvas，这个画布仅仅提供给外层一个View，
  * 添加到自己的视图树中，添加到画布中的视图是{@link ADBrowser}内部自己调用的。
+ * @author sunhongfa
  */
 public interface ADCanvas extends ViewParent {
   /**

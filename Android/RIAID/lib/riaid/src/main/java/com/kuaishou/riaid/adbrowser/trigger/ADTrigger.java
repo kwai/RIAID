@@ -11,6 +11,7 @@ import com.kuaishou.riaid.proto.nano.SystemKeyEnum;
  * {@link ADTrigger}。
  * 在本系统中，也可以自定义的触发器，暂无。
  * 注意：触发器也可以触发触发器
+ * @author sunhongfa
  */
 public interface ADTrigger {
   /**
